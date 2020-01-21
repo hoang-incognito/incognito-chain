@@ -20,23 +20,19 @@ contract Token {
 
 contract IncognitoUniSwap {
 
+    // uniswap factory address which is used to get exchange's address from token address.
     address _factory;
-    address _owner;
 
     // fallback function which allows transfer eth.
     function() external payable {}
 
     constructor(address factoryAddress) public {
-        _owner = msg.sender;
         _factory = factoryAddress;
     }
 
-    modifier isOwner {
-        require(msg.sender == _owner, "unauthorized");
-        _;
-    }
-
-    // verifyProof verifies burnt proof from txid
+    /**
+     * verifyProof verifies burnt proof from txid
+     */
     function verifyProof(string memory txId) internal returns (bool) {
         return true;
     }
@@ -68,11 +64,13 @@ contract IncognitoUniSwap {
 
     /**
      * transferToken transfers token to recipient
+     * @param txid contains user's burnt proof, smc verify burnt proof, if the proof is correct, token is sent to user
      * @param tokenAddress token's address is used to transfer token.
      * @param recipient is address that receives token.
      * @param amount number of token which is transferred to recipient.
      */
-    function transferToken(address tokenAddress, address recipient, uint amount) public isOwner {
+    function transferToken(string memory txid, address tokenAddress, address recipient, uint amount) public {
+        require(verifyProof(txid));
         uint256 balance = Token(tokenAddress).balanceOf(address(this));
         require(balance >= amount && amount > 0);
         Token(tokenAddress).transfer(recipient, amount);
@@ -83,17 +81,25 @@ contract IncognitoUniSwap {
      * @param recipient is address that receives eth
      * @param amount number of eth which is transferred to recipient.
      */
-    function transferEth(address payable recipient, uint256 amount) public isOwner {
-        require(address(this).balance >= amount, "insufficience funds");
+    function transferEth(string memory txid, address payable recipient, uint256 amount) public {
+        require(verifyProof(txid));
+        require(address(this).balance >= amount, "insufficient funds");
         recipient.transfer(amount);
     }
 
     /**
      * tokenBalance gets token's balance of this smart contract
-     *  @param tokenAddress is used to get exchange address.
+     * @param tokenAddress is used to get exchange address.
      */
     function tokenBalance(address tokenAddress) public view returns (uint256) {
         return Token(tokenAddress).balanceOf(address(this));
+    }
+
+    /**
+     * balance returns current ETH balance of this smart contract.
+     */
+    function balance() public view returns (uint256) {
+        return address(this).balance;
     }
 
     /**
@@ -124,7 +130,7 @@ contract IncognitoUniSwap {
     */
     function eth2Token(address tokenAddress, uint256 ethAmount) internal returns (uint256) {
         // eth must be greater than 0.
-        require(address(this).balance >= ethAmount, "eth must be greater than 0");
+        require(address(this).balance >= ethAmount, "insufficience funds");
         // get exchange address
         address exchangeAddress = getExchangeAddress(tokenAddress);
         // swap
@@ -166,4 +172,3 @@ contract IncognitoUniSwap {
         return amount;
     }
 }
-
