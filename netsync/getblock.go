@@ -14,11 +14,13 @@ func (netSync *NetSync) GetBlockShardByHash(blkHashes []common.Hash) []wire.Mess
 	for _, blkHash := range blkHashes {
 		blk, _, err := netSync.config.BlockChain.GetShardBlockByHash(blkHash)
 		if err != nil {
+			blkMsgs = append(blkMsgs, nil)
 			Logger.log.Error(err)
 			continue
 		}
 		newMsg, err := wire.MakeEmptyMessage(wire.CmdBlockShard)
 		if err != nil {
+			blkMsgs = append(blkMsgs, nil)
 			Logger.log.Error(err)
 			continue
 		}
@@ -31,6 +33,10 @@ func (netSync *NetSync) GetBlockShardByHash(blkHashes []common.Hash) []wire.Mess
 func (netSync *NetSync) getBlockShardByHashAndSend(peerID libp2p.ID, blkType byte, blkHashes []common.Hash, crossShardID byte) {
 	for _, blkHash := range blkHashes {
 		blk, _, err := netSync.config.BlockChain.GetShardBlockByHash(blkHash)
+		if blk == nil {
+			continue
+		}
+
 		if err != nil {
 			Logger.log.Error(err)
 			continue
@@ -54,11 +60,13 @@ func (netSync *NetSync) GetBlockBeaconByHash(
 	for _, blkHash := range blkHashes {
 		blk, _, err := netSync.config.BlockChain.GetBeaconBlockByHash(blkHash)
 		if err != nil {
+			blkMsgs = append(blkMsgs, nil)
 			Logger.log.Error(err)
 			continue
 		}
 		newMsg, err := wire.MakeEmptyMessage(wire.CmdBlockBeacon)
 		if err != nil {
+			blkMsgs = append(blkMsgs, nil)
 			Logger.log.Error(err)
 			continue
 		}
@@ -71,6 +79,10 @@ func (netSync *NetSync) GetBlockBeaconByHash(
 func (netSync *NetSync) getBlockBeaconByHashAndSend(peerID libp2p.ID, blkHashes []common.Hash) {
 	for _, blkHash := range blkHashes {
 		blk, _, err := netSync.config.BlockChain.GetBeaconBlockByHash(blkHash)
+		if blk == nil {
+			continue
+		}
+
 		if err != nil {
 			Logger.log.Error(err)
 			continue
@@ -89,6 +101,9 @@ func (netSync *NetSync) getBlockBeaconByHashAndSend(peerID libp2p.ID, blkHashes 
 	}
 }
 
+// GetBlockShardByHeight returns all blocks requested
+// If any block is not present, this method returns nil as the corresponding message
+// to make sure length of the response is the same as request (help caching on highway)
 func (netSync *NetSync) GetBlockShardByHeight(fromPool bool, blkType byte, specificHeight bool, shardID byte, blkHeights []uint64, crossShardID byte) []wire.Message {
 	if !specificHeight {
 		if len(blkHeights) != 2 || blkHeights[1] < blkHeights[0] {
@@ -113,6 +128,7 @@ func (netSync *NetSync) GetBlockShardByHeight(fromPool bool, blkType byte, speci
 			blkHeight++
 		}
 		if blkHeight <= 1 {
+			blkMsgs = append(blkMsgs, nil) // To make sure response have the same length as request
 			continue
 		}
 		var blkMsg wire.Message
@@ -121,11 +137,13 @@ func (netSync *NetSync) GetBlockShardByHeight(fromPool bool, blkType byte, speci
 			case crossShard:
 				blkToSend := netSync.config.CrossShardPool[shardID].GetBlockByHeight(crossShardID, blkHeight)
 				if blkToSend == nil {
+					blkMsgs = append(blkMsgs, nil)
 					Logger.log.Error(err)
 					continue
 				}
 				blkMsg, err = wire.MakeEmptyMessage(wire.CmdCrossShard)
 				if err != nil {
+					blkMsgs = append(blkMsgs, nil)
 					Logger.log.Error(err)
 					continue
 				}
@@ -133,11 +151,13 @@ func (netSync *NetSync) GetBlockShardByHeight(fromPool bool, blkType byte, speci
 			case shardToBeacon:
 				blkToSend := netSync.config.ShardToBeaconPool.GetBlockByHeight(shardID, blkHeight)
 				if blkToSend == nil {
+					blkMsgs = append(blkMsgs, nil)
 					Logger.log.Error(err)
 					continue
 				}
 				blkMsg, err = wire.MakeEmptyMessage(wire.CmdBlkShardToBeacon)
 				if err != nil {
+					blkMsgs = append(blkMsgs, nil)
 					Logger.log.Error(err)
 					continue
 				}
@@ -146,11 +166,13 @@ func (netSync *NetSync) GetBlockShardByHeight(fromPool bool, blkType byte, speci
 		} else {
 			blk, err := netSync.config.BlockChain.GetShardBlockByHeight(blkHeight, shardID)
 			if err != nil {
+				blkMsgs = append(blkMsgs, nil)
 				Logger.log.Error(err)
 				continue
 			}
 			blkMsg, err = netSync.createBlockShardMsgByType(blk, blkType, crossShardID)
 			if err != nil {
+				blkMsgs = append(blkMsgs, nil)
 				Logger.log.Error(err)
 				continue
 			}
@@ -167,6 +189,10 @@ func (netSync *NetSync) getBlockShardByHeightAndSend(peerID libp2p.ID, fromPool 
 	blkMsgs := netSync.GetBlockShardByHeight(fromPool, blkType, specificHeight, shardID, blkHeights, crossShardID)
 
 	for _, blkMsg := range blkMsgs {
+		if blkMsgs == nil {
+			continue
+		}
+
 		err := netSync.config.Server.PushMessageToPeer(blkMsg, peerID)
 		// fmt.Println("CROSS:", blkHeights, err)
 		if err != nil {
@@ -181,6 +207,7 @@ func (netSync *NetSync) GetBlockBeaconByHeight(fromPool bool, specificHeight boo
 			return nil
 		}
 	}
+	// NOTE: just a precaution, requested blocks are always sorted by default
 	sort.Slice(blkHeights, func(i, j int) bool { return blkHeights[i] < blkHeights[j] })
 	var (
 		blkHeight uint64
@@ -198,15 +225,18 @@ func (netSync *NetSync) GetBlockBeaconByHeight(fromPool bool, specificHeight boo
 			blkHeight++
 		}
 		if blkHeight <= 1 {
+			blkMsgs = append(blkMsgs, nil) // To make sure response have the same length as request
 			continue
 		}
 		blk, err := netSync.config.BlockChain.GetBeaconBlockByHeight(blkHeight)
 		if err != nil {
+			blkMsgs = append(blkMsgs, nil)
 			continue
 		}
 		msgBeaconBlk, err := wire.MakeEmptyMessage(wire.CmdBlockBeacon)
 		if err != nil {
 			Logger.log.Error(err)
+			blkMsgs = append(blkMsgs, nil)
 			continue
 		}
 		msgBeaconBlk.(*wire.MessageBlockBeacon).Block = blk
@@ -218,6 +248,10 @@ func (netSync *NetSync) GetBlockBeaconByHeight(fromPool bool, specificHeight boo
 func (netSync *NetSync) getBlockBeaconByHeightAndSend(peerID libp2p.ID, fromPool bool, specificHeight bool, blkHeights []uint64) {
 	blkMsgs := netSync.GetBlockBeaconByHeight(fromPool, specificHeight, blkHeights)
 	for _, blkMsg := range blkMsgs {
+		if blkMsgs == nil {
+			continue
+		}
+
 		err := netSync.config.Server.PushMessageToPeer(blkMsg, peerID)
 		if err != nil {
 			Logger.log.Error(err)
