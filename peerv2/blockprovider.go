@@ -22,6 +22,23 @@ func (bp *BlockProvider) Register(ctx context.Context, req *proto.RegisterReques
 	return nil, nil
 }
 
+func encodeAllMessages(blkMsgs []wire.Message) [][]byte {
+	allMsgs := [][]byte{}
+	for _, msg := range blkMsgs {
+		var data []byte
+		if msg != nil {
+			encoded, err := encodeMessage(msg)
+			if err != nil {
+				Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
+			} else {
+				data = []byte(encoded)
+			}
+		}
+		allMsgs = append(allMsgs, data)
+	}
+	return allMsgs
+}
+
 func (bp *BlockProvider) GetBlockShardByHeight(
 	ctx context.Context,
 	req *proto.GetBlockShardByHeightRequest,
@@ -44,14 +61,7 @@ func (bp *BlockProvider) GetBlockShardByHeight(
 	)
 	Logger.Info("[blkbyheight] Blockshard received from netsync:", len(blkMsgs))
 	resp := &proto.GetBlockShardByHeightResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	return resp, nil
 }
 
@@ -71,14 +81,7 @@ func (bp *BlockProvider) GetBlockShardByHash(ctx context.Context, req *proto.Get
 	)
 	Logger.Info("[blkbyhash] Blockshard received from netsync:", len(blkMsgs))
 	resp := &proto.GetBlockShardByHashResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	return resp, nil
 }
 
@@ -100,14 +103,7 @@ func (bp *BlockProvider) GetBlockBeaconByHeight(
 		reqHeights,
 	)
 	resp := &proto.GetBlockBeaconByHeightResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	Logger.Info("[blkbyheight] Blockbeacon received from netsync: ", len(blkMsgs))
 	return resp, nil
 }
@@ -129,14 +125,7 @@ func (bp *BlockProvider) GetBlockBeaconByHash(ctx context.Context, req *proto.Ge
 	)
 	Logger.Info("[blkbyhash] Block beacon received from netsync:", len(blkMsgs))
 	resp := &proto.GetBlockBeaconByHashResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	return resp, nil
 }
 
@@ -152,14 +141,7 @@ func (bp *BlockProvider) GetBlockCrossShardByHeight(ctx context.Context, req *pr
 	)
 	Logger.Info("[blkbyheight] BlockCS received from netsync:", len(blkMsgs))
 	resp := &proto.GetBlockCrossShardByHeightResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	return resp, nil
 }
 
@@ -184,14 +166,7 @@ func (bp *BlockProvider) GetBlockShardToBeaconByHeight(ctx context.Context, req 
 	)
 	Logger.Info("[blkbyheight] BlockS2B received from netsync:", len(blkMsgs))
 	resp := &proto.GetBlockShardToBeaconByHeightResponse{}
-	for _, msg := range blkMsgs {
-		encoded, err := encodeMessage(msg)
-		if err != nil {
-			Logger.Warnf("ERROR Failed encoding message %v", msg.MessageType())
-			continue
-		}
-		resp.Data = append(resp.Data, []byte(encoded))
-	}
+	resp.Data = encodeAllMessages(blkMsgs)
 	return resp, nil
 }
 

@@ -1503,6 +1503,10 @@ func (serverObj *Server) UpdateConsensusState(role string, userPbk string, curre
 
 func (serverObj *Server) putResponseMsgs(msgs [][]byte) {
 	for _, msg := range msgs {
+		if msg == nil || len(msg) == 0 {
+			continue
+		}
+
 		// Create dummy msg wrapping grpc response
 		psMsg := &p2ppubsub.Message{
 			Message: &pb.Message{
