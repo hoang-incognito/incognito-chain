@@ -197,7 +197,7 @@ func (blockchain *BlockChain) InsertShardBlock(shardBlock *ShardBlock, isValidat
 	Logger.log.Infof("SHARD %+v | Remove Data After Processed, block height %+v with hash %+v \n", shardBlock.Header.ShardID, shardBlock.Header.Height, blockHash)
 	blockchain.removeOldDataAfterProcessingShardBlock(shardBlock, shardID)
 	Logger.log.Infof("SHARD %+v | Update Beacon Instruction, block height %+v with hash %+v \n", shardBlock.Header.ShardID, shardBlock.Header.Height, blockHash)
-	err = blockchain.updateDatabaseFromBeaconInstructions(beaconBlocks, shardID)
+	err = blockchain.updateDatabaseFromBeaconInstructions(beaconBlocks, shardID, shardBlock.Header.Height)
 	if err != nil {
 		return err
 	}

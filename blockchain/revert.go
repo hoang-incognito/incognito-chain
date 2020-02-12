@@ -271,7 +271,7 @@ func (blockchain *BlockChain) backupDatabaseFromBeaconInstruction(
 					}
 				}
 				//TODO: check later
-				err = blockchain.getRewardAmountForUserOfShard(shardID, shardRewardInfo, committee[byte(shardToProcess)], &rewardReceivers, true)
+				err = blockchain.getRewardAmountForUserOfShard(0, shardID, shardRewardInfo, committee[byte(shardToProcess)], &rewardReceivers, true)
 				if err != nil {
 					return err
 				}

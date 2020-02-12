@@ -147,7 +147,7 @@ func (blockchain *BlockChain) BuildRewardInstructionByEpoch(blkHeight, epoch uin
 	return resInst, nil
 }
 
-func (blockchain *BlockChain) updateDatabaseFromBeaconInstructions(beaconBlocks []*BeaconBlock, shardID byte) error {
+func (blockchain *BlockChain) updateDatabaseFromBeaconInstructions(beaconBlocks []*BeaconBlock, shardID byte, shardHeight uint64) error {
 	rewardReceivers := make(map[string]string)
 	committee := make(map[byte][]incognitokey.CommitteePublicKey)
 	isInit := false
@@ -183,7 +183,7 @@ func (blockchain *BlockChain) updateDatabaseFromBeaconInstructions(beaconBlocks 
 						return err
 					}
 					for key := range beaconBlkRewardInfo.BeaconReward {
-						err = db.AddCommitteeReward(publicKeyCommittee, beaconBlkRewardInfo.BeaconReward[key], key)
+						err = db.AddCommitteeReward(shardHeight, publicKeyCommittee, beaconBlkRewardInfo.BeaconReward[key], key)
 						if err != nil {
 							return err
 						}
@@ -201,7 +201,7 @@ func (blockchain *BlockChain) updateDatabaseFromBeaconInstructions(beaconBlocks 
 						return err
 					}
 					for key := range incDAORewardInfo.IncDAOReward {
-						err = db.AddCommitteeReward(keyWalletDevAccount.KeySet.PaymentAddress.Pk, incDAORewardInfo.IncDAOReward[key], key)
+						err = db.AddCommitteeReward(shardHeight, keyWalletDevAccount.KeySet.PaymentAddress.Pk, incDAORewardInfo.IncDAOReward[key], key)
 						if err != nil {
 							return err
 						}
@@ -230,7 +230,7 @@ func (blockchain *BlockChain) updateDatabaseFromBeaconInstructions(beaconBlocks 
 					}
 					json.Unmarshal(committeeBytes, &committee)
 				}
-				err = blockchain.getRewardAmountForUserOfShard(shardID, shardRewardInfo, committee[byte(shardToProcess)], &rewardReceivers, false)
+				err = blockchain.getRewardAmountForUserOfShard(shardHeight, shardID, shardRewardInfo, committee[byte(shardToProcess)], &rewardReceivers, false)
 				if err != nil {
 					return err
 				}
@@ -364,6 +364,7 @@ func getPercentForIncognitoDAO(blockHeight, blkPerYear uint64) int {
 }
 
 func (blockchain *BlockChain) getRewardAmountForUserOfShard(
+	shardHeight uint64,
 	selfShardID byte,
 	rewardInfoShardToProcess *metadata.ShardBlockRewardInfo,
 	committeeOfShardToProcess []incognitokey.CommitteePublicKey,
@@ -390,7 +391,7 @@ func (blockchain *BlockChain) getRewardAmountForUserOfShard(
 				if forBackup {
 					err = blockchain.GetDatabase().BackupCommitteeReward(wl.KeySet.PaymentAddress.Pk, key)
 				} else {
-					err = blockchain.GetDatabase().AddCommitteeReward(wl.KeySet.PaymentAddress.Pk, value/uint64(committeeSize), key)
+					err = blockchain.GetDatabase().AddCommitteeReward(shardHeight, wl.KeySet.PaymentAddress.Pk, value/uint64(committeeSize), key)
 				}
 				if err != nil {
 					// errChan <- err

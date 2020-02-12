@@ -169,7 +169,7 @@ type DatabaseInterface interface {
 	AddShardRewardRequest(epoch uint64, shardID byte, amount uint64, tokenID common.Hash, bd *[]BatchData) error
 	GetRewardOfShardByEpoch(epoch uint64, shardID byte, tokenID common.Hash) (uint64, error)
 	GetAllTokenIDForReward(epoch uint64) ([]common.Hash, error)
-	AddCommitteeReward(committeeAddress []byte, amount uint64, tokenID common.Hash) error
+	AddCommitteeReward(height uint64, committeeAddress []byte, amount uint64, tokenID common.Hash) error
 	GetCommitteeReward(committeeAddress []byte, tokenID common.Hash) (uint64, error)
 	RemoveCommitteeReward(committeeAddress []byte, amount uint64, tokenID common.Hash, bd *[]BatchData) error
 	ListCommitteeReward() map[string]map[common.Hash]uint64
