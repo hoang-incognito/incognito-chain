@@ -76,6 +76,7 @@ func (blockchain *BlockChain) VerifyPreSignShardBlock(shardBlock *ShardBlock, sh
 func (blockchain *BlockChain) InsertShardBlock(shardBlock *ShardBlock, isValidated bool) error {
 	blockchain.chainLock.Lock()
 	defer blockchain.chainLock.Unlock()
+	isValidated = false
 	shardID := shardBlock.Header.ShardID
 	blockHash := shardBlock.Header.Hash()
 
