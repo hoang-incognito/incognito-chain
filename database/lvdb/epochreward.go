@@ -310,7 +310,7 @@ func AddTestCommitteeReward(
 }
 
 // ListCommitteeReward - get reward on tokenID of all committee
-func ListTestCommitteeReward(db *db) map[string]map[uint64]map[common.Hash]uint64 {
+func (db *db) ListTestCommitteeReward() map[string]map[uint64]map[common.Hash]uint64 {
 	result := make(map[string]map[uint64]map[common.Hash]uint64)
 	iterator := db.lvdb.NewIterator(util.BytesPrefix(testCommitteeRewardPrefix), nil)
 	for iterator.Next() {

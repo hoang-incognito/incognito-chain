@@ -149,6 +149,7 @@ const (
 	CreateRawWithDrawTransaction = "withdrawreward"
 	getRewardAmount              = "getrewardamount"
 	listRewardAmount             = "listrewardamount"
+	listRewardAmountByHeight     = "listrewardamountbyheight"
 
 	revertbeaconchain = "revertbeaconchain"
 	revertshardchain  = "revertshardchain"

@@ -135,6 +135,7 @@ var HttpHandler = map[string]httpHandler{
 	CreateRawWithDrawTransaction: (*HttpServer).handleCreateAndSendWithDrawTransaction,
 	getRewardAmount:              (*HttpServer).handleGetRewardAmount,
 	listRewardAmount:             (*HttpServer).handleListRewardAmount,
+	listRewardAmountByHeight:     (*HttpServer).handleListRewardAmountByHeight,
 
 	// revert
 	revertbeaconchain: (*HttpServer).handleRevertBeacon,
