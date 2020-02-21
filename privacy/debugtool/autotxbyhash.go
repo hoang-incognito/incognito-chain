@@ -1,6 +1,6 @@
 package debugtool
 
-type AutoTx struct {
+type AutoTxByHash struct {
 	ID     int `json:"Id"`
 	Result struct {
 		BlockHash   string `json:"BlockHash"`
