@@ -231,6 +231,7 @@ func (cm *ConnManager) keepHighwayConnection() {
 	for {
 		select {
 		case <-watchTimestep:
+			Logger.Infof("Current highway address: %+v", currentHighway)
 			if currentHighway == nil {
 				var err error
 				if currentHighway, hwAddrs, err = refreshHighway(); err != nil {
