@@ -782,6 +782,9 @@ func (blockGenerator *BlockGenerator) getPendingTransaction(
 			tempTxDesc, err := blockGenerator.chain.config.TempTxPool.MaybeAcceptBatchTransactionForBlockProducing(listTxs, int64(beaconHeight))
 			if err != nil {
 				for _, tx2 := range listTxs {
+					if blockGenerator.chain.config.TempTxPool.HaveTransaction(tx2.Hash()) {
+						continue
+					}
 					txShardID := common.GetShardIDFromLastByte(tx2.GetSenderAddrLastByte())
 					if txShardID != shardID {
 						continue
