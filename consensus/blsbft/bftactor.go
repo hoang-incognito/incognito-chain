@@ -323,7 +323,8 @@ func (e *BLSBFT) enterProposePhase() {
 
 	blockData, _ := json.Marshal(e.RoundData.Block)
 	msg, _ := MakeBFTProposeMsg(blockData, e.ChainKey, e.UserKeySet)
-	// e.logger.Info("push block", time.Since(time1).Seconds())
+	aaa, _ := msg.JsonSerialize()
+	e.logger.Infof("------- push block ----- len block %d \n block: %", len(aaa), string(blockData))
 	go e.Node.PushMessageToChain(msg, e.Chain)
 	e.enterVotePhase()
 }
