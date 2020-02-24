@@ -243,7 +243,7 @@ func (blockchain *BlockChain) InsertBeaconBlock(beaconBlock *BeaconBlock, isVali
 
 // updateNumOfBlocksByProducers updates number of blocks produced by producers
 func (beaconBestState *BeaconBestState) updateNumOfBlocksByProducers(beaconBlock *BeaconBlock, chainParamEpoch uint64) {
-	producer := beaconBlock.GetProducerPubKeyStr()
+	producer := beaconBlock.GetProducer()
 	if beaconBlock.GetHeight()%chainParamEpoch == 1 {
 		beaconBestState.NumOfBlocksByProducers = map[string]uint64{
 			producer: 1,

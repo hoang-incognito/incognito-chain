@@ -17,6 +17,7 @@ type MessageBFT struct {
 	Content   []byte
 	ChainKey  string
 	Timestamp int64
+	TimeSlot  uint64
 }
 
 func (msg *MessageBFT) Hash() string {

@@ -949,7 +949,7 @@ func (synker *Synker) InsertBeaconBlockFromPool() {
 	curEpoch := GetBeaconBestState().Epoch
 	sameCommitteeBlock := blocks
 	for i, v := range blocks {
-		if v.GetCurrentEpoch() == curEpoch+1 {
+		if v.GetEpoch() == curEpoch+1 {
 			sameCommitteeBlock = blocks[:i+1]
 			break
 		}
@@ -1006,7 +1006,7 @@ func (synker *Synker) InsertShardBlockFromPool(shardID byte) {
 	sameCommitteeBlock := blocks
 
 	for i, v := range blocks {
-		if v.GetCurrentEpoch() == curEpoch+1 {
+		if v.GetEpoch() == curEpoch+1 {
 			sameCommitteeBlock = blocks[:i+1]
 			break
 		}

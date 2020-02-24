@@ -10,5 +10,5 @@ type BlockInterface interface {
 	GetRoundKey() string
 	GetInstructions() [][]string
 	GetConsensusType() string
-	GetCurrentEpoch() uint64
+	GetEpoch() uint64
 }

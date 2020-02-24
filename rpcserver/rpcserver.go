@@ -75,13 +75,13 @@ type RpcServerConfig struct {
 		PushMessageToAll(message wire.Message) error
 		PushMessageToPeer(message wire.Message, id peer2.ID) error
 		GetNodeRole() string
-		// GetUserKeySet() *incognitokey.KeySet
 		EnableMining(enable bool) error
 		IsEnableMining() bool
 		GetChainMiningStatus(chain int) string
 		GetPublicKeyRole(publicKey string, keyType string) (int, int)
-		GetIncognitoPublicKeyRole(publicKey string) (int, bool, int)
+		// GetIncognitoPublicKeyRole(publicKey string) (int, bool, int)
 		GetMinerIncognitoPublickey(publicKey string, keyType string) []byte
+		GetIncognitoPublicKeyStatus(publicKey string) (int, bool, int)
 	}
 	ConsensusEngine interface {
 		GetUserLayer() (string, int)

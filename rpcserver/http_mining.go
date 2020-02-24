@@ -141,7 +141,7 @@ func (httpServer *HttpServer) handleGetIncognitoPublicKeyRole(params interface{}
 		return nil, rpcservice.NewRPCError(rpcservice.RPCInvalidParamsError, errors.New("key param is invalid"))
 	}
 
-	role, isBeacon, shardID := httpServer.config.Server.GetIncognitoPublicKeyRole(keyParam)
+	role, isBeacon, shardID := httpServer.config.Server.GetIncognitoPublicKeyStatus(keyParam)
 	if role == -2 {
 		return nil, rpcservice.NewRPCError(rpcservice.RPCInternalError, errors.New("Can't get publickey role"))
 	}

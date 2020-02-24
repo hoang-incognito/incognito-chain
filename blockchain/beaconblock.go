@@ -28,7 +28,7 @@ func (beaconBlock BeaconBlock) Hash() *common.Hash {
 	return &hash
 }
 
-func (beaconBlock BeaconBlock) GetCurrentEpoch() uint64 {
+func (beaconBlock BeaconBlock) GetEpoch() uint64 {
 	return beaconBlock.Header.Epoch
 }
 
